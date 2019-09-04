@@ -17,9 +17,9 @@ import os.path
 
 sys.path = [os.path.abspath(os.path.os.path.dirname(os.path.dirname(__file__)))] + sys.path
 
-import Quora Challenge
+import quorachallenge
 
-from Quora Challenge.version import __version__ as version, __author__ as author, __copyright__ as copyright, __email__ as email, __release__ as release
+from quorachallenge.version import __version__ as version, __author__ as author, __copyright__ as copyright, __email__ as email, __release__ as release
 project = u'Quora Challenge'
 
 # If extensions (or modules to document with autodoc) are in another directory,
