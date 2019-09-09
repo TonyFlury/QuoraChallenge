@@ -20,6 +20,7 @@ import pprint
 import io
 
 from typing import Union, Any
+from collections.abc import Iterable
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import webbrowser
@@ -99,7 +100,8 @@ def test_data(challenge_name:str, id:str=None):
     return str
 
 def describe(challenge_name:str, webpage:bool = True):
-    """Describe the specified challenge. By default this function will open a web-browser and display the description of the challenge.
+    """Describe the specified challenge.
+        By default this function will open a web-browser and display the description of the challenge.
 
         :param str challenge_name: The case insensitive name for the challenge.
         :param bool webpage: When True the function will open the users default web browser and display the description in a new tab or windows. When False the function will return the description in `REST`_ format.
@@ -118,15 +120,16 @@ def describe(challenge_name:str, webpage:bool = True):
 # This decorator is implemented as a class, but uses lowercase naming deliberately
 class AutoTest:
     """A callable class/decorator, which will automatically test the function against the challenge requirements.
-      By default will immediately report any errors and unexpected exceptions that are raised by the function that is decorated.
+        By default will immediately report any errors and unexpected exceptions that are raised by the function that is decorated.
 
         :param str challenge_name: The case insensitive name for the challenge.
         :param str id: A specific id to execute.
-        :param bool defer_results:
-                When False the decorator will immediately report test errors and unexpected exceptions upon completion of the automatic testing.
-                When True the function will be automatically tested but test failures and exceptions are recorded but not automatically reported.
+        :param bool defer_results: When False the decorator will immediately report test errors and unexpected exceptions upon completion of the automatic testing.
+                                   When True the function will be automatically tested but test failures and exceptions are recorded but not automatically reported.
 
-        When defer_results is True, the test failures and exceptions are accessed via the :ref:`errors<errors_property>` and :ref:`exceptions<eexceptions_property>` properties.
+        When defer_results is True, the test failures and exceptions are accessed via the :ref:`errors<property_errors>`
+        and :ref:`exceptions<property_exceptions>` properties. and the :ref:`passed property<property_passed>` provides a simple
+        True/False report on whether the requested tests completed without errors or unexpected exceptions.
 
         *The test data for the challenge is downloaded from a remote site, so using this function requires an active public internet connection.*
 
@@ -172,6 +175,7 @@ class AutoTest:
         self._exceptions = []
         self._defer_results = defer_results
         self._id = id
+        self._testsrun = False
 
     def __call__(self, test_function:callable) -> bool:
         """Invoking the decorator will automatically test the function"""
@@ -189,6 +193,7 @@ class AutoTest:
             print('Test failures : ')
             print('\n'.join(self._errors))
 
+        self._testsrun = True
         return self.passed
 
     def _compare(self, row_index:0, test_row:dict, test_function:callable) -> None:
@@ -197,6 +202,11 @@ class AutoTest:
             id = test_row['id']
             test_input = test_row['input']
             expected_output = test_row['output']
+
+            # Top level lists are always interpreted as tuples
+            if isinstance(expected_output, list):
+                expected_output = tuple(expected_output)
+
             exceptions = test_row.get('raises', tuple())
             # Convert test names from the json into actual exception types
             can_raise = tuple(__builtins__[name] for name in exceptions if issubclass(__builtins__.get(name, None), Exception))
@@ -227,6 +237,7 @@ class AutoTest:
         # compare values
         message = self._compare_values(expected_output, output)
 
+
         if message:
             self._errors.append(f'Test {id} - Incorrect result : {message}')
 
@@ -241,8 +252,14 @@ class AutoTest:
         if isinstance(expected,str):
             return self._compare_str(expected,received)
 
+        if isinstance(expected, tuple):
+            return self._compare_tuples(expected,received)
+
         if expected != received:
             return f'Expected {expected} != {received}'
+
+    def _compare_tuple(self, expected:tuple, received:tuple) -> str:
+        return self._compare_iterables(expected,received, tuple)
 
     def _compare_lists(self, expected: list, received:list) -> str:
         return self._compare_iterables( expected,received, list)
@@ -250,9 +267,10 @@ class AutoTest:
     def _compare_str(self, expected: list, received:list) -> str:
         return self._compare_iterables( expected,received, str)
 
-    def _compare_iterables(self, expected : Union[str,list], received : Union[str,list], _type:type):
+    def _compare_iterables(self, expected : Iterable, received : Iterable, _type:type):
         """Intelligent comparison of iterable - list or str"""
-        _type_label = 'list' if _type is list else 'str'
+        _type_label = 'list' if _type is list else ('str' if _type is str else 'tuple')
+
         if not isinstance(received,_type):
             return f'Expected Output should be a {_type_label} - got a {type(received)} entries'
 
@@ -262,9 +280,11 @@ class AutoTest:
         if len(expected) < len(received):
             return f'Output is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
 
+
         for i, (ei, oi) in enumerate(zip(expected, received)):
-            if oi != ei:
-                return f'Unexpected output - first incorrect value at position {i}: expected {ei}, received {oi}'
+            res = _compare_value(ei, oi)
+            if res:
+                return f'{_type_label} index {i} : {res}'
         return ''
 
     def _compare_dicts(self, expected : dict, received : dict):
@@ -301,5 +321,5 @@ class AutoTest:
 
     @property
     def passed(self) -> bool:
-        """"""
-        return not self.errors and not self.exceptions
+        """True only if all of the requested tests passed successfully"""
+        return self._testsrun and not self.errors and not self.exceptions

@@ -24,6 +24,18 @@ Content
 
 .. autoclass:: quorachallenge.AutoTest
 
+.. _property_errors:
+
+.. autoproperty:: quorachallenge.AutoTest.errors
+
+.. _property_exceptions:
+
+.. autoproperty:: quorachallenge.AutoTest.exceptions
+
+.. _property_passed:
+
+.. autoproperty:: quorachallenge.AutoTest.passed
+
 .. _function_testdata:
 
 .. autofunction:: quorachallenge.testdata

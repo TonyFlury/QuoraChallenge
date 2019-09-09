@@ -8,8 +8,8 @@ This framework supports the programming challenges as published from time to tim
 
 It is entirely possible to complete the challenges without using this framework, though the framework does provide a few useful features:
 
- - A function :ref:`describe(challenge_name) <function_describes>` which provides easy to access description of the challenge, without needing to access the original post on Quora.
- - A decorator :ref:`solves(challenge_name) <function_AutoTest>` which will automatically test the function being decorated and report both test failures and any execptions raised by the function.
+ - A function :ref:`describe(challenge_name,..) <function_describes>` which provides easy to access description of the challenge, without needing to access the original post on Quora.
+ - A decorator :ref:`Autotest(challenge_name,..) <function_AutoTest>` which will automatically test the function being decorated and report both test failures and any execptions raised by the function.
 
 For a short tutorial of how to use the framework see :doc:`Gettng Started<GettingStarted>`
 

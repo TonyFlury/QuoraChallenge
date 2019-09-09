@@ -6,7 +6,9 @@ This section documents how experienced developers can implement their own challe
 
 Pre requisites
 --------------
-    The pre-requisites are that you have git and have an account on Git Hub.
+    - You are a known contributor to either `Python Beginners`_ or `Python Programmers`_ spaces on `Quora`_
+    - You have git on your developement machine
+    - you have an account on Git Hub.
 
 Process Overview
 ----------------
@@ -20,6 +22,12 @@ There is a simple 8 step process to provide your own challenges :
 6. Once the challenge content is complete - commit and push the changes to your git hub fork.
 7. Request a pull request to merge your branch into the main repository.
 8. Once the merge has been completed - publicise your challenge in the appropriate space.
+
+When compiling your challenge, please keep in mind at all times the target audience. The `Python Beginnners` space is
+intended for those developers who are just starting out with Python and likely just starting out with development. It is
+likely that they wont be up to speed with most data structure and algorithms. Challenges aimed at the developers in
+`Python Programmers`_ (who generally have skill level intermediate and beyond) will be much less common and should be
+more likely to admit more than one style of solution.
 
 .. toctree::
     description
