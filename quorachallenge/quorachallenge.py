@@ -94,6 +94,7 @@ def test_data(challenge_name:str, id:str=None):
                 continue
             row['id'] = ident
             stream.write(f'------\n')
+            row['input'] = f'your_function({row["input"]})'
             pprint.pprint(row,stream,indent=4)
 
         str = stream.getvalue()
@@ -203,46 +204,34 @@ class AutoTest:
             test_input = test_row['input']
             expected_output = test_row['output']
 
-            # Top level lists are always interpreted as tuples
-            if isinstance(expected_output, list):
-                expected_output = tuple(expected_output)
-
             exceptions = test_row.get('raises', tuple())
             # Convert test names from the json into actual exception types
             can_raise = tuple(__builtins__[name] for name in exceptions if issubclass(__builtins__.get(name, None), Exception))
+            expected_output = eval(expected_output)
         except (KeyError, TypeError) as e:
-            raise ValueError(f"Invalid test data for challenge '{self._name}' : row {row_index}: {e!s}") from None
+            raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e!s}") from None
 
         try:
-            if isinstance(test_input,(list,)):
-                if len(test_input) == 2 and isinstance(test_input[0],list) and isinstance(test_input[1], dict):
-                    # special case to allow combined positional and key word argument
-                    output = test_function(*test_input[0], **test_input[1])
-                else:
-                    # Treat everything as a positional argument
-                    output = test_function(*test_input)
-            elif isinstance(test_input,dict):
-                # Treat contents ng as key word argument
-                output = test_function(**test_input)
-            else:
-                # Neither a list or a dict - so must be a single numeric or string - so a positional argument only
-                output = test_function(test_input)
+            output = eval(f'test_function{test_input}')
+        except SyntaxError:
+            raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e!s}") from None
+
         except can_raise as e:
             # This is an expected exception for this test case
             return
         except Exception as e:
-            self._exceptions.append(f'Unexpected exception raised - inputs {test_input!s} - exception : {e!s}')
+            self._exceptions.append(f'Unexpected exception raised on Test case id {id} - inputs {test_function.__name__}({test_input}) : Exception raised - {e!s}')
             return
 
         # compare values
         message = self._compare_values(expected_output, output)
-
 
         if message:
             self._errors.append(f'Test {id} - Incorrect result : {message}')
 
     def _compare_values(self, expected:Any, received:Any):
         """"Intelligent value comparison - with context sensitive messaging"""
+
         if isinstance(expected, list):
             return self._compare_lists(expected, received)
 
@@ -280,9 +269,8 @@ class AutoTest:
         if len(expected) < len(received):
             return f'Output is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
 
-
         for i, (ei, oi) in enumerate(zip(expected, received)):
-            res = _compare_value(ei, oi)
+            res = self._compare_values(ei, oi)
             if res:
                 return f'{_type_label} index {i} : {res}'
         return ''

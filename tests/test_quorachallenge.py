@@ -66,7 +66,7 @@ class TestCases(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':[1,2],'output':3}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1,2)','output':'3'}],description='This is the description'))
     def test_000_010_single_pass(self):
         """Test a simple function which will pass once"""
 
@@ -78,7 +78,9 @@ class TestCases(unittest.TestCase):
         solver(func)
         self.assertTrue(solver.passed)
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':[1,2],'output':3},{'input':[5,3],'output':8}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1,2)','output':'3'},
+                                                                      {'input':'(5,3)','output':'8'}],
+                                                                        description='This is the description'))
     def test_000_020_multiple_pass(self):
         """Ensure that the multiple correct passes are recorded"""
 
@@ -93,7 +95,8 @@ class TestCases(unittest.TestCase):
         self.assertEqual(len(solver.exceptions), 0)
 
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':[1,2],'output':3},{'input':[5,3],'output':7}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1,2)','output':'3'},
+                                                                      {'input':'(5,3)','output':'7'}],description='This is the description'))
     def test_000_100_single_fail(self):
         """Single test cases with a single test failure"""
         def func(a,b):
@@ -106,7 +109,8 @@ class TestCases(unittest.TestCase):
         self.assertEqual(len(solver.errors), 1)
         self.assertEqual(len(solver.exceptions), 0)
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':[1,2],'output':4},{'input':[5,3],'output':7}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1,2)','output':'4'},
+                                                                      {'input':'(5,3)','output':'7'}],description='This is the description'))
     def test_000_110_multiple_fail(self):
         """Multiple test failures"""
 
@@ -120,7 +124,7 @@ class TestCases(unittest.TestCase):
         self.assertEqual(len(solver.errors), 2)
         self.assertEqual(len(solver.exceptions), 0)
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':[1,2],'output':3},{'input':[5,3],'output':8}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1,2)','output':'3'},{'input':'(5,3)','output':'8'}],description='This is the description'))
     def test_000_200_exceptions(self):
         """Function under tests raises an exception"""
         def func(a,b):
@@ -135,7 +139,7 @@ class TestCases(unittest.TestCase):
         self.assertEqual(len(solver.exceptions), 1)
         self.assertEqual(len(solver.errors), 0)
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':1, 'raises':['ValueError'], 'output':3},{'input':3,'output':9}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1)', 'raises':['ValueError'], 'output':'3'},{'input':'(3)','output':'9'}],description='This is the description'))
     def test_000_210_allowed_exceptions(self):
         """Function under tests raises an exception"""
         def func(a):
@@ -150,7 +154,7 @@ class TestCases(unittest.TestCase):
         self.assertEqual(len(solver.exceptions), 0)
         self.assertEqual(len(solver.errors), 0)
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':3,'output':[1,2]},{'input':4,'output':[1,2,3]}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(3)','output':'[1,2]'},{'input':'(4)','output':'[1,2,3]'}],description='This is the description'))
     def test_100_000_list_correct(self):
         """Received list is too short - expect a useful error."""
 
@@ -162,7 +166,7 @@ class TestCases(unittest.TestCase):
         passed = solver(func)
         self.assertTrue(passed)
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':3,'output':[1,2,3]},{'input':4,'output':[1,2,3,4]}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(3)','output':'[1,2,3]'},{'input':'(4)','output':'[1,2,3,4]'}],description='This is the description'))
     def test_100_010_list_too_short(self):
         """Received list is too short - expect a useful error."""
 
@@ -175,7 +179,7 @@ class TestCases(unittest.TestCase):
         self.assertRegex(solver.errors[0], r'Test 0 - Incorrect result : Output is too short - expecting list of length 3, received list of length 2')
         self.assertRegex(solver.errors[1], r'Test 1 - Incorrect result : Output is too short - expecting list of length 4, received list of length 3')
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':3,'output':[1,2,3]},{'input':4,'output':[1,2,3,4]}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(3)','output':'[1,2,3]'},{'input':'(4)','output':'[1,2,3,4]'}],description='This is the description'))
     def test_100_020_list_too_long(self):
         """Received list is too long - expect a useful error."""
 
@@ -188,7 +192,7 @@ class TestCases(unittest.TestCase):
         self.assertRegex(solver.errors[0], r'Test 0 - Incorrect result : Output is too long - expecting list of length 3, received list of length 5')
         self.assertRegex(solver.errors[1], r'Test 1 - Incorrect result : Output is too long - expecting list of length 4, received list of length 7')
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':3,'output':[1,2,4]},{'input':4,'output':[2,2,3,4]}],description='This is the description'))
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(3)','output':'[1,2,4]'},{'input':'(4)','output':'[2,2,3,4]'}],description='This is the description'))
     def test_100_030_list_incorrect(self):
         """Returned result is the correct length but is incorrect at a particular position"""
         def func(a):
@@ -198,11 +202,11 @@ class TestCases(unittest.TestCase):
 
         passed = solver(func)
 
-        self.assertRegex(solver.errors[0], r'Test 0 - Incorrect result : Unexpected output - first incorrect value at position 2: expected 4, received 3')
-        self.assertRegex(solver.errors[1], r'Test 1 - Incorrect result : Unexpected output - first incorrect value at position 0: expected 2, received 1')
+        self.assertRegex(solver.errors[0], r'Test 0 - Incorrect result : list index 2 : Expected 4 != 3')
+        self.assertRegex(solver.errors[1], r'Test 1 - Incorrect result : list index 0 : Expected 2 != 1')
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':3,'output':{1:1,2:2}},
-                                                                      {'input':4,'output':{1:1,2:2,3:3}}],
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(3)','output':'{1:1,2:2}'},
+                                                                      {'input':'(4)','output':'{1:1,2:2,3:3}'}],
                                                       description='This is the description'))
     def test_200_000_dict_correct(self):
         """Returned result is a correct dictionary"""
@@ -215,8 +219,8 @@ class TestCases(unittest.TestCase):
         self.assertTrue(passed)
 
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':3,'output':{1:1,2:2}},
-                                                                      {'input':4,'output':{1:1,2:2,3:3}}],
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(3)','output':'{1:1,2:2}'},
+                                                                      {'input':'(4)','output':'{1:1,2:2,3:3}'}],
                                                       description='This is the description'))
     def test_200_010_dict_missing_key(self):
         """Returned result is dictionary with missing keys"""
@@ -232,8 +236,8 @@ class TestCases(unittest.TestCase):
         self.assertRegex(solver.errors[0], r'Test 0 - Incorrect result : Output is missing these expected keys : 1,2')
         self.assertRegex(solver.errors[1], r'Test 1 - Incorrect result : Output is missing these expected keys : 1,2,3')
 
-    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':1,'output':{1:1}},
-                                                                      {'input':2,'output':{1:1,2:2}}],
+    @patch.object(qc.requests,'get', patched_requests(200, test_data=[{'input':'(1)','output':'{1:1}'},
+                                                                      {'input':'(2)','output':'{1:1,2:2}'}],
                                                       description='This is the description'))
     def test_200_020_dict_extra_key(self):
         """Returned result is dictionary with extra keys"""
