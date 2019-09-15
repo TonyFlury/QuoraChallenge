@@ -5,7 +5,7 @@ Framework Details
 Overview
 --------
 
-The quorachallenge module is a framework to assist developers to are taking part in the Quora Python challenges which will posted ocassionally in  `Python Beginners`_ or `Python Programmers`_ `Quora`_ spaces.
+The quorachallenge module is a framework to assist developers to are taking part in the Quora Python challenges which will posted ocassionally in  `Python Beginners`_ or `Python Programming`_ `Quora`_ spaces.
 The challenges will all require the implementation of a Python function which will meet the specific interface and functionality as required.
 
 The framework provides:
@@ -16,7 +16,7 @@ The framework provides:
 Content
 -------
 
-.. _function_describes:
+.. _function_describe:
 
 .. autofunction:: quorachallenge.describe
 
@@ -38,11 +38,11 @@ Content
 
 .. _function_testdata:
 
-.. autofunction:: quorachallenge.testdata
+.. autofunction:: quorachallenge.test_data
 
 .. seealso::
 
 .. _REST : http://docutils.sourceforge.net/docs/user/rst/quickstart.html
 .. _Python Beginners : https://www.quora.com/q/python-beginners
-.. _Python Programmers : https://www.quora.com/q/python-programmers
+.. _Python Programming : https://www.quora.com/q/python-programming
 .. _Quora : https://www.quora.com/

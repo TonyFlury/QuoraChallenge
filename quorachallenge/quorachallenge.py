@@ -75,14 +75,14 @@ def _fetch(challenge_name:str, item:str, optional:bool=False) -> Union[requests.
 
     return response
 
-def test_data(challenge_name:str, id:str=None):
+def test_data(challenge_name:str, id:str=None, _directory:str=None):
     """Display the test data for the given challenge
 
-            :param str challenge_name: The case insensitive name for the challenge.
-            :param str id: The test id. If left as the default value this function will display the data for all of the test cases.
-                           If it is not None, then this function will display the data for the test case with that id - if it exists.
+        :param str challenge_name: The case insensitive name for the challenge.
+        :param str id: The test id. If left as the default value this function will display the data for all of the test cases.
+                If it is not None, then this function will display the data for the test case with that id - if it exists.
 
-        *The test data is downloaded from a remote site, so this function requires an active public internet connection.*
+        *In normal use the test data is downloaded from a remote site, so this function requires an active public internet connection.*
     """
     challenge_name = challenge_name.lower()
 
@@ -94,23 +94,23 @@ def test_data(challenge_name:str, id:str=None):
                 continue
             row['id'] = ident
             stream.write(f'------\n')
-            row['input'] = f'your_function({row["input"]})'
+            row['arguments'] = f'your_function({row["arguments"]})'
             pprint.pprint(row,stream,indent=4)
 
         str = stream.getvalue()
     return str
 
-def describe(challenge_name:str, webpage:bool = True):
+def describe(challenge_name:str, webpage:bool = True, _directory:str=None):
     """Describe the specified challenge.
         By default this function will open a web-browser and display the description of the challenge.
 
         :param str challenge_name: The case insensitive name for the challenge.
         :param bool webpage: When True the function will open the users default web browser and display the description in a new tab or windows. When False the function will return the description in `REST`_ format.
 
-        *The description is downloaded from a remote site, so this function requires an active public internet connection.*
+        *In normal use the description is downloaded from a remote site, so this function requires an active public internet connection.*
     """
     mame = challenge_name.lower()
-    response = _fetch(challenge_name, 'description')
+    response = _fetch(challenge_name, 'description.rst')
 
     if webpage:
         html = docutils.core.publish_string( source= response.text,  writer_name="html")
@@ -132,7 +132,7 @@ class AutoTest:
         and :ref:`exceptions<property_exceptions>` properties. and the :ref:`passed property<property_passed>` provides a simple
         True/False report on whether the requested tests completed without errors or unexpected exceptions.
 
-        *The test data for the challenge is downloaded from a remote site, so using this function requires an active public internet connection.*
+        *In normal use the test data for the challenge is downloaded from a remote site, so using this function requires an active public internet connection.*
 
         Examples :
 
@@ -157,19 +157,11 @@ class AutoTest:
                     print(solver.exceptions)
     """
 
-    def __init__(self, challenge_name:str, id:str = None, defer_results:bool=False):
+    def __init__(self, challenge_name:str, id:str = None, defer_results:bool=False,_directory:str=None):
         """"""
         challenge_name = challenge_name.lower()
-        _compare = _fetch(challenge_name, 'compare', optional=True)
-        self._data = _fetch(challenge_name, 'testdata').json()
-        if _compare:
-            _globals = {}
-            try:
-                exec(_compare.text, __globals = _globals)
-            except Exception as e:
-                raise e from None
-
-            self._compare = _globals['compare']
+        resp = _fetch(challenge_name, 'testdata.json')
+        self._data = resp.json()
         self._name = challenge_name
 
         self._errors = []
@@ -189,11 +181,15 @@ class AutoTest:
 
         if not self._defer_results:
             print('Exceptions raised:')
-            print('\n'.join(self._exceptions))
-            print('\n\n')
-            print('Test failures : ')
-            print('\n'.join(self._errors))
-
+            if self._exceptions:
+                print('\n'.join(self._exceptions))
+            else:
+                print('None')
+            print('\nTest failures : ')
+            if self._errors:
+                print('\n'.join(self._errors))
+            else:
+                print('None')
         self._testsrun = True
         return self.passed
 
@@ -201,30 +197,41 @@ class AutoTest:
         """Execute a comparison for this item in the test data"""
         try:
             id = test_row['id']
-            test_input = test_row['input']
-            expected_output = test_row['output']
+            arguments = test_row['arguments']
+            expected_return = test_row['return']
 
-            exceptions = test_row.get('raises', tuple())
+            can_raise_name = test_row.get('raises', '')
+
             # Convert test names from the json into actual exception types
-            can_raise = tuple(__builtins__[name] for name in exceptions if issubclass(__builtins__.get(name, None), Exception))
-            expected_output = eval(expected_output)
+            try:
+                can_raise = __builtins__.get(can_raise_name,tuple)
+            except AttributeError:
+                can_raise = tuple()
+            else:
+                if not issubclass(can_raise,BaseException):
+                    can_raise = tuple()
+
+            expected_return = eval(expected_return)
         except (KeyError, TypeError) as e:
-            raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e!s}") from None
+            raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e}") from None
 
         try:
-            output = eval(f'test_function{test_input}')
-        except SyntaxError:
+            received_return_value = eval(f'test_function({arguments})')
+        except SyntaxError as e:
             raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e!s}") from None
 
         except can_raise as e:
             # This is an expected exception for this test case
             return
-        except Exception as e:
-            self._exceptions.append(f'Unexpected exception raised on Test case id {id} - inputs {test_function.__name__}({test_input}) : Exception raised - {e!s}')
+        except Exception as err:
+            err_string = str(err)
+            if not(err_string):
+                err_string = type(err).__name__
+            self._exceptions.append(f'Unexpected exception raised on Test case id {id} - call {test_function.__name__}({arguments}) : Exception raised - {err_string}')
             return
 
         # compare values
-        message = self._compare_values(expected_output, output)
+        message = self._compare_values(expected_return, received_return_value)
 
         if message:
             self._errors.append(f'Test {id} - Incorrect result : {message}')
@@ -261,13 +268,13 @@ class AutoTest:
         _type_label = 'list' if _type is list else ('str' if _type is str else 'tuple')
 
         if not isinstance(received,_type):
-            return f'Expected Output should be a {_type_label} - got a {type(received)} entries'
+            return f'Expected return should be a {_type_label} - got a {type(received)} entries'
 
         if len(expected) > len(received):
-            return f'Output is too short - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
+            return f'return is too short - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
 
         if len(expected) < len(received):
-            return f'Output is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
+            return f'return is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
 
         for i, (ei, oi) in enumerate(zip(expected, received)):
             res = self._compare_values(ei, oi)
@@ -279,7 +286,7 @@ class AutoTest:
         """Intelligent comparison of dictionaries"""
 
         if not isinstance(received,dict):
-            return f'Expected Output should be a list - got a {type(received)} entries'
+            return f'Expected return should be a list - got a {type(received)} entries'
 
         e_keys, o_keys = set(expected.keys()), set(received.keys())
 
@@ -287,9 +294,9 @@ class AutoTest:
             missing = e_keys - o_keys
             extra = o_keys - e_keys
             if missing:
-                return f'Output is missing these expected keys : {",".join(repr(x) for x in missing)}'
+                return f'return is missing these expected keys : {",".join(repr(x) for x in missing)}'
             if extra:
-                return f'Output has these extra keys : {",".join(repr(x) for x in extra)}'
+                return f'return has these extra keys : {",".join(repr(x) for x in extra)}'
 
         for key in expected:
             if expected[key] != received[key]:
@@ -311,3 +318,13 @@ class AutoTest:
     def passed(self) -> bool:
         """True only if all of the requested tests passed successfully"""
         return self._testsrun and not self.errors and not self.exceptions
+
+
+def func(a,b):
+    if a < 0 and b < 0:
+        raise ValueError
+    if a < 0 or b < 0:
+        return 0
+    if a == 0 or b == 0:
+        return 0
+    return a+b

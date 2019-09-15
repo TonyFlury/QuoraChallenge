@@ -16,7 +16,7 @@ The Quora challenge framework is very easy to use and can do 3 main useful thing
 To get the challenge Description
 --------------------------------
 
-To get a description of the challenge (in this case 'challenge1') use the :ref:`describe function<function_describes>`.
+To get a description of the challenge (in this case 'challenge1') use the :ref:`describe function<function_describe>`.
 
 .. code-block:: pycon
 
