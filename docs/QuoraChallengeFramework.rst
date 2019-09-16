@@ -13,36 +13,45 @@ The framework provides:
  - the ability to automatically test the function written as an entry to the challenge
  - easy to read test data
 
-Content
--------
+Functions
+---------
 
 .. _function_describe:
 
 .. autofunction:: quorachallenge.describe
 
+.. _function_testdata:
+
+.. autofunction:: quorachallenge.testdata
+
+autotest class
+--------------
+
 .. _function_AutoTest:
 
-.. autoclass:: quorachallenge.AutoTest
+.. autoclass:: quorachallenge.autotest
+
+.. _function_results:
+
+.. automethod:: quorachallenge.autotest.results
 
 .. _property_errors:
 
-.. autoproperty:: quorachallenge.AutoTest.errors
+.. autoproperty:: quorachallenge.autotest.errors
 
 .. _property_exceptions:
 
-.. autoproperty:: quorachallenge.AutoTest.exceptions
+.. autoproperty:: quorachallenge.autotest.exceptions
 
 .. _property_passed:
 
-.. autoproperty:: quorachallenge.AutoTest.passed
+.. autoproperty:: quorachallenge.autotest.passed
 
-.. _function_testdata:
+.. _property_executed:
 
-.. autofunction:: quorachallenge.test_data
+.. autoproperty:: quorachallenge.autotest.executed
 
-.. seealso::
-
-.. _REST : http://docutils.sourceforge.net/docs/user/rst/quickstart.html
+.. _rst : http://docutils.sourceforge.net/docs/user/rst/quickstart.html
 .. _Python Beginners : https://www.quora.com/q/python-beginners
 .. _Python Programming : https://www.quora.com/q/python-programming
 .. _Quora : https://www.quora.com/

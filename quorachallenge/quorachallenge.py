@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 """
 # quorachallenge : Quora Challenge Framework
@@ -12,127 +12,70 @@ Use Case :
 Testable Statements :
     ...
 """
+from . import _core
+from typing import Any, Collection, Sequence, Union
+import math
+import cmath
 
-from . version import *
-import docutils.core
-import requests
-import pprint
-import io
+import sys
 
-from typing import Union, Any
-from collections.abc import Iterable
+if sys.version_info[0] != 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 6):
+    raise ImportError('Quora Challenge Framework is only supported on Python 3.6 and later.')
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import webbrowser
-
-def __LoadInDefaultBrowser(html:str) -> None:
-    """Display html in the default web browser without creating a temp file.
-
-    Instantiates a trivial http server and calls webbrowser.open with a URL
-    to retrieve html from that server.
-    """
-    class RequestHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            self.send_response(200)
-            self.send_header('Content-Type','text/html')
-            self.send_header('Content-Length', len(html))
-            self.send_header('Content-Encoding','utf-8')
-            self.end_headers()
-            self.wfile.write(b'<!DOCTYPE html>')
-            self.wfile.write(b'<meta charset="utf-8">')
-            bufferSize = 1024*1024
-            for i in range(0, len(html), bufferSize):
-                self.wfile.write(html[i:i+bufferSize])
-
-    server = HTTPServer(('127.0.0.1', 8080), RequestHandler)
-    webbrowser.open('http://127.0.0.1:%s' % server.server_port)
-    server.handle_request()
-
-
-def __build_url(challenge_name:str, item:str) -> str:
-    return f'https://raw.githubusercontent.com/TonyFlury/QuoraChallengesTestData/master/{challenge_name}/{item}'
-
-def _fetch(challenge_name:str, item:str, optional:bool=False) -> Union[requests.Response, None]:
-    """Simple fetch of a resource from a given name and item"
-
-        :param str challenge_name: The name of the challenge to fetch the data for
-        :param str item : The item to be fetched
-        :param bool optional : Whether the item is optional or not
-                               if optional is True then a 404 error generates a None return value
-                               if optional is False then a 404 error results in a Value Error
-    """
-    url = __build_url(challenge_name, item)
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-    except requests.HTTPError:
-        if not optional:
-            raise ValueError(f"Unable to find description for '{challenge_name}' : Is the name correct ?") from None
-        else:
-            return None
-    except requests.exceptions.RequestException as exc:
-        raise exc from None
-
-    return response
-
-def test_data(challenge_name:str, id:str=None, _directory:str=None):
+def testdata(challenge_name: str, test_id: str = None, _directory: str = None):
     """Display the test data for the given challenge
 
-        :param str challenge_name: The case insensitive name for the challenge.
-        :param str id: The test id. If left as the default value this function will display the data for all of the test cases.
-                If it is not None, then this function will display the data for the test case with that id - if it exists.
+    :param str challenge_name: The lower case name for the challenge.
+    :param str test_id: The test test_id. If left as the default value this function will display the data for
+                all of the test cases.
+                If it is not None, then this function will display the data for the test case with that test_id.
+    :param str _directory: The base local directory to search for this challenge in. Implemented to allow testing
+                of challenges before publication. For Contributor use only.
 
-        *In normal use the test data is downloaded from a remote site, so this function requires an active public internet connection.*
+    *In normal use the test data is downloaded from a remote site, so this function requires an active public internet
+    connection.*
     """
-    challenge_name = challenge_name.lower()
+    c = _core.Challenge(challenge_name, _directory)
+    print(c.testdata(test_id))
 
-    with io.StringIO() as stream:
-        _data = _fetch(challenge_name, item='testdata').json()
-        for index, row in enumerate(_data):
-            ident = row.get('id', str(index))
-            if id is not None and id != ident:
-                continue
-            row['id'] = ident
-            stream.write(f'------\n')
-            row['arguments'] = f'your_function({row["arguments"]})'
-            pprint.pprint(row,stream,indent=4)
 
-        str = stream.getvalue()
-    return str
+def describe(challenge_name: str, webpage: bool = True, _directory: str = None):
+    """Display the Description of this challenge
 
-def describe(challenge_name:str, webpage:bool = True, _directory:str=None):
-    """Describe the specified challenge.
-        By default this function will open a web-browser and display the description of the challenge.
+    :param str challenge_name: The lower case name for the challenge.
+    :param bool webpage: When True the description is displayed in a tab in the browser. When False the text is
+            returned in a raw form - rst formatted.
+    :param str _directory: The base local directory to search for this challenge in. Implemented to allow testing of
+            challenges before publication. For Contributor use only.
 
-        :param str challenge_name: The case insensitive name for the challenge.
-        :param bool webpage: When True the function will open the users default web browser and display the description in a new tab or windows. When False the function will return the description in `REST`_ format.
-
-        *In normal use the description is downloaded from a remote site, so this function requires an active public internet connection.*
+    *In normal use the test data is downloaded from a remote site, so this function requires an active public internet
+    connection.*
     """
-    mame = challenge_name.lower()
-    response = _fetch(challenge_name, 'description.rst')
+    c = _core.Challenge(challenge_name, _directory)
+    return c.describe(webpage=webpage)
 
-    if webpage:
-        html = docutils.core.publish_string( source= response.text,  writer_name="html")
-        __LoadInDefaultBrowser(html=html)
-    else:
-        return response
 
-# This decorator is implemented as a class, but uses lowercase naming deliberately
-class AutoTest:
+# noinspection PyPep8Naming
+class autotest:
     """A callable class/decorator, which will automatically test the function against the challenge requirements.
-        By default will immediately report any errors and unexpected exceptions that are raised by the function that is decorated.
+        By default will immediately report any errors and unexpected exceptions that are raised by the function that
+        is decorated.
 
         :param str challenge_name: The case insensitive name for the challenge.
-        :param str id: A specific id to execute.
-        :param bool defer_results: When False the decorator will immediately report test errors and unexpected exceptions upon completion of the automatic testing.
-                                   When True the function will be automatically tested but test failures and exceptions are recorded but not automatically reported.
+        :param str test_id: A specific test_id to execute.
+        :param bool defer_results: When False the decorator will immediately report test errors and unexpected
+                                   exceptions upon completion of the automatic testing.
+                                   When True the function will be automatically tested but test failures and exceptions
+                                   are recorded but not automatically reported.
+        :param str _directory: The base local directory to search for this challenge in. Implemented to allow testing
+                of challenges before publication. For Contributor use only.
 
         When defer_results is True, the test failures and exceptions are accessed via the :ref:`errors<property_errors>`
-        and :ref:`exceptions<property_exceptions>` properties. and the :ref:`passed property<property_passed>` provides a simple
-        True/False report on whether the requested tests completed without errors or unexpected exceptions.
+        and :ref:`exceptions<property_exceptions>` properties. and the :ref:`passed property<property_passed>` provides
+        a simple True/False report on whether the requested tests completed without errors or unexpected exceptions.
 
-        *In normal use the test data for the challenge is downloaded from a remote site, so using this function requires an active public internet connection.*
+        *In normal use the test data for the challenge is downloaded from a remote site, so using this function requires
+        an active public internet connection.*
 
         Examples :
 
@@ -157,46 +100,51 @@ class AutoTest:
                     print(solver.exceptions)
     """
 
-    def __init__(self, challenge_name:str, id:str = None, defer_results:bool=False,_directory:str=None):
-        """"""
-        challenge_name = challenge_name.lower()
-        resp = _fetch(challenge_name, 'testdata.json')
+    def __init__(self, challenge_name, test_id: str = None, defer_results: bool = None, _directory: str = None):
+        self._challenge = _core.Challenge(challenge_name=challenge_name, _directory=_directory)
+        resp = self._challenge.fetch('testdata.json')
         self._data = resp.json()
-        self._name = challenge_name
-
-        self._errors = []
-        self._exceptions = []
+        self._errors = {}
+        self._exceptions = {}
+        self._successful = set()
         self._defer_results = defer_results
-        self._id = id
+        self._test_id = test_id
         self._testsrun = False
+        self._cases_completed = 0
 
-    def __call__(self, test_function:callable) -> bool:
+    def __call__(self, test_function: callable) -> bool:
         """Invoking the decorator will automatically test the function"""
+        self._errors.clear()
+        self._exceptions.clear()
+
         for index, item in enumerate(self._data):
-            id = item.get('id', str(index))
-            if self._id is not None and id != self._id:
+            test_id = item.get('test_id', str(index))
+            if self._test_id is not None and test_id != self._test_id:
                 continue
-            item['id'] = id
-            self._compare( index, item, test_function )
+            item['test_id'] = test_id
+            self._compare(index, item, test_function)
+
+        self._cases_completed = len(self._data)
 
         if not self._defer_results:
-            print('Exceptions raised:')
+            print(f'{self._cases_completed} test cases executed.')
+            print('Unexpected exceptionsraised:')
             if self._exceptions:
-                print('\n'.join(self._exceptions))
+                print('\n'.join(x for x in self._exceptions.values()))
             else:
                 print('None')
-            print('\nTest failures : ')
+            print('\nReturn value errors : ')
             if self._errors:
-                print('\n'.join(self._errors))
+                print('\n'.join(x for x in self._errors.values()))
             else:
                 print('None')
         self._testsrun = True
         return self.passed
 
-    def _compare(self, row_index:0, test_row:dict, test_function:callable) -> None:
+    def _compare(self, row_index: 0, test_row: dict, test_function: callable) -> None:
         """Execute a comparison for this item in the test data"""
         try:
-            id = test_row['id']
+            test_id = test_row['test_id']
             arguments = test_row['arguments']
             expected_return = test_row['return']
 
@@ -204,39 +152,48 @@ class AutoTest:
 
             # Convert test names from the json into actual exception types
             try:
-                can_raise = __builtins__.get(can_raise_name,tuple)
+                can_raise = __builtins__.get(can_raise_name, tuple)
             except AttributeError:
                 can_raise = tuple()
             else:
-                if not issubclass(can_raise,BaseException):
+                if not issubclass(can_raise, BaseException):
                     can_raise = tuple()
 
             expected_return = eval(expected_return)
         except (KeyError, TypeError) as e:
-            raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e}") from None
+            if 'test_id' not in test_row:
+                local_test_id = f'Entry {row_index}'
+            else:
+                local_test_id = f'Id {test_row["test_id"]}'
+            raise ValueError(f"Invalid test data for challenge '{self._challenge.name}' : "
+                             f"{local_test_id}: {e}") from None
 
         try:
             received_return_value = eval(f'test_function({arguments})')
         except SyntaxError as e:
-            raise ValueError(f"Invalid test data for challenge '{self._name}' : Id {id}: {e!s}") from None
+            raise ValueError(f"Invalid data for challenge '{self._challenge.name}' : Id {test_id}: {e!s}") from None
 
-        except can_raise as e:
+        except can_raise:
             # This is an expected exception for this test case
             return
         except Exception as err:
             err_string = str(err)
-            if not(err_string):
+            if not err_string:
                 err_string = type(err).__name__
-            self._exceptions.append(f'Unexpected exception raised on Test case id {id} - call {test_function.__name__}({arguments}) : Exception raised - {err_string}')
+            self._exceptions[
+                test_id] = f'Unexpected exception raised on Test case test_id {test_id} - ' \
+                           f'call {test_function.__name__}({arguments}) : Exception raised - {err_string}'
             return
 
         # compare values
         message = self._compare_values(expected_return, received_return_value)
 
         if message:
-            self._errors.append(f'Test {id} - Incorrect result : {message}')
+            self._errors[test_id] = f'Test {test_id} - Incorrect result : {message}'
+        else:
+            self._successful.add(test_id)
 
-    def _compare_values(self, expected:Any, received:Any):
+    def _compare_values(self, expected: Any, received: Any):
         """"Intelligent value comparison - with context sensitive messaging"""
 
         if isinstance(expected, list):
@@ -245,36 +202,49 @@ class AutoTest:
         if isinstance(expected, dict):
             return self._compare_dicts(expected, received)
 
-        if isinstance(expected,str):
-            return self._compare_str(expected,received)
+        if isinstance(expected, str):
+            return self._compare_str(expected, received)
 
         if isinstance(expected, tuple):
-            return self._compare_tuples(expected,received)
+            return self._compare_tuples(expected, received)
+
+        if isinstance(expected, float):
+            if not math.isclose(expected, received, abs_tol=1e-09):
+                return f'Expected ({expected}) !~ Returned ({received})'
+
+        if isinstance(expected, complex):
+            if not cmath.isclose(expected, received, abs_tol=1e-09):
+                return f'Expected ({expected}) !~ Returned ({received})'
 
         if expected != received:
-            return f'Expected {expected} != {received}'
+            return f'Expected ({expected}) != Returned ({received})'
 
-    def _compare_tuple(self, expected:tuple, received:tuple) -> str:
-        return self._compare_iterables(expected,received, tuple)
+    def _compare_tuples(self, expected: tuple, received: tuple) -> str:
+        """Compare two tuples"""
+        return self._compare_iterables(expected, received, tuple)
 
-    def _compare_lists(self, expected: list, received:list) -> str:
-        return self._compare_iterables( expected,received, list)
+    def _compare_lists(self, expected: list, received: list) -> str:
+        """Compare two lists"""
+        return self._compare_iterables(expected, received, list)
 
-    def _compare_str(self, expected: list, received:list) -> str:
-        return self._compare_iterables( expected,received, str)
+    def _compare_str(self, expected: str, received: str) -> str:
+        """Compare two strings"""
+        return self._compare_iterables(expected, received, str)
 
-    def _compare_iterables(self, expected : Iterable, received : Iterable, _type:type):
-        """Intelligent comparison of iterable - list or str"""
+    def _compare_iterables(self, expected: Union[Collection, Sequence], received: Union[Collection, Sequence], _type):
+        """Intelligent comparison of iterable - tuple, list or str"""
         _type_label = 'list' if _type is list else ('str' if _type is str else 'tuple')
 
-        if not isinstance(received,_type):
+        if not isinstance(received, _type):
             return f'Expected return should be a {_type_label} - got a {type(received)} entries'
 
         if len(expected) > len(received):
-            return f'return is too short - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
+            return f'return is too short - expecting {_type_label} of length {len(expected)}, received {_type_label} ' \
+                   f'of length {len(received)}'
 
         if len(expected) < len(received):
-            return f'return is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} of length {len(received)}'
+            return f'return is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} ' \
+                   f'of length {len(received)}'
 
         for i, (ei, oi) in enumerate(zip(expected, received)):
             res = self._compare_values(ei, oi)
@@ -282,10 +252,11 @@ class AutoTest:
                 return f'{_type_label} index {i} : {res}'
         return ''
 
-    def _compare_dicts(self, expected : dict, received : dict):
+    @staticmethod
+    def _compare_dicts(expected: dict, received: dict):
         """Intelligent comparison of dictionaries"""
 
-        if not isinstance(received,dict):
+        if not isinstance(received, dict):
             return f'Expected return should be a list - got a {type(received)} entries'
 
         e_keys, o_keys = set(expected.keys()), set(received.keys())
@@ -304,27 +275,43 @@ class AutoTest:
 
         return ''
 
+    def results(self, test_id):
+        """Return the results for this test test_id if executed
+
+        :param str test_id: The test test_id to be queried
+
+        This methods returns a text string which indicates whether the given test test_id passed successfully, resulted
+        in an return value error, or an unexpected exception.
+
+        Returns an empty string if this test test_id has not been executed.
+        """
+        if test_id in self._successful:
+            return 'Test passed'
+
+        if test_id in self._errors:
+            return self._errors[test_id]
+
+        if test_id in self._exceptions:
+            return self._exceptions[test_id]
+
+        return ''
+
     @property
     def errors(self) -> list:
         """The list of errors identified during the automated testing your function"""
-        return self._errors
+        return list(self._errors.values())
 
     @property
     def exceptions(self) -> list:
         """The list of unexpected exceptions identified during the automated testing your function"""
-        return self._exceptions
+        return list(self._exceptions.values())
 
     @property
     def passed(self) -> bool:
         """True only if all of the requested tests passed successfully"""
         return self._testsrun and not self.errors and not self.exceptions
 
-
-def func(a,b):
-    if a < 0 and b < 0:
-        raise ValueError
-    if a < 0 or b < 0:
-        return 0
-    if a == 0 or b == 0:
-        return 0
-    return a+b
+    @property
+    def executed(self) -> int:
+        """The number of test cases executed under this instance on the last run"""
+        return self._cases_completed

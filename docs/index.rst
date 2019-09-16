@@ -13,6 +13,9 @@ It is entirely possible to complete the challenges without using this framework,
 
 For a short tutorial of how to use the framework see :doc:`Gettng Started <GettingStarted>`
 
+.. note::
+    The Quora Challenge Framework is only supported on Python 3.6 onwards. Versions for Python 3.5 and earlier, and Python 2 do not exist and are highly unlikely to be produced.
+
 Suggested reading order
 -----------------------
 

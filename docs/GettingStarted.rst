@@ -20,9 +20,8 @@ To get a description of the challenge (in this case 'challenge1') use the :ref:`
 
 .. code-block:: pycon
 
-    import quorachallenge
-
-    quorachallenge.describe('challenge1')
+    >>> import quorachallenge
+    >>> quorachallenge.describe('challenge1')
 
 This code snippet will open a new web browser tab or window and display the description of the challenge.
 
@@ -39,14 +38,30 @@ Imagine we have written function ``my_func`` to 'solve challenge1'
 
     import quorachallenge
 
-    @quorachallenge.AutoTest('challenge')
+    @quorachallenge.autotest('challenge')
     def my_func(a, b):
         return a+b
 
 Then this code snippet will automatically test my_func against all of the test cases defined for this challenge, and report any errors or exceptions that occur during the testing.
 The displayed messages will identify the test case id that failed and some details of the failure.
 
-The :ref:`autotest Decorator<function_AutoTest>` has options not shown here, which can be useful in some circumstances.
+The :ref:`AutoTest Decorator<function_AutoTest>` can also be used in a more indirect way as shown in this example
+
+.. code-block:: pycon
+
+    >>> import quorachallenge as qc
+            ...
+    >>> tester = qc.autotest('challenge1', defer_results=True)
+    >>> passed = tester(func)
+    >>> passed
+    False
+    >>> print('\n'.join(tester.errors))
+    Test 500 - Incorrect result : Expected (0) != Returned (1)
+    >>> tester.results('500')
+    'Test 500 - Incorrect result : Expected (0) != Returned (1)'
+
+The :ref:`AutoTest Decorator<function_AutoTest>` can also be passed a specific test id, so as to repeat just that single
+test case. This can be very useful in debugging failures.
 
 .. display_testdata:
 
@@ -54,11 +69,14 @@ Display testdata
 ----------------
 To display the test data for a given challenge use the :ref:`testdata function<function_testdata>`.
 
-.. code-block:: python
+.. code-block:: pycon
 
-    import quorachallenge
-
-    quorachallenge.testdata('challenge1')
+    >>> import quorachallenge
+    >>> quorachallenge.testdata('challenge1',test_id='500')
+    ------
+    Id : 500
+    Called as : your_function(0,0)
+    Expected to return : 0
 
 This code snippet will display all the test data that exists for 'challenge1'. There is an optional 2nd argument to the
 ``testdata`` function that allows you to select the test data for just a single test case :
@@ -73,13 +91,13 @@ This code snippet will display just the test data for the test case with id '1';
 
 When looking at the test data as displayed from this function :
 
-    id
+    Id
         The id of this tests case
-
     called as
         how the function will be called for this test case
-
-    output
+    Raises
+        The Exception that the function should raise under this test case
+    Returns
         The expected return value for this test case
 
-
+    For any given test case, there will be either an expected Return value, or an expected Exception listed but not both.

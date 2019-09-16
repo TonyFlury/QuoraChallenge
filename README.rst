@@ -24,9 +24,10 @@ The framework for the Quora development challenges - supporting project descript
 Features
 --------
 
- - Feature 1
- - Feature 2
- - Feature 3
+ - In Browser display of challenge description/requirements
+ - automated testing against pre-defined test data
+ - display of pre-defined test data
+ - data and description downloaded from central repository
 
 ------------
 Installation
@@ -49,8 +50,7 @@ To upgrade an existing installation use
 Getting Started
 ---------------
 
-Document here a summary of how to use the module functionality
-
+See `Full Documentation`_ for information on how to get started, and details of the full framework features.
 
 -------------------
 Further Information

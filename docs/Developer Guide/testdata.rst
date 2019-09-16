@@ -31,13 +31,13 @@ Structure
 The testdata.json file is a simple array of dictionaries. If you are not familiar with JSON format it is human readable,
 and is very similar to Python formatting :
 
-    - JSON arrays are delimited by square brackets (like Python lists)
-    - JSON dictionaries are delimited by braces {like Python dictionaries
+  - JSON arrays are delimited by square brackets (like Python lists)
+  - JSON dictionaries are delimited by braces {like Python dictionaries
 
- the main relevant differences are that:
+the main relevant differences are that:
 
-    - JSON only uses a double quote character to delimit strings (Python of course can use single or double quotes)
-    - Neither JSON lists or dictionaries can have trailing commas (unlike their Python equivalents).
+  - JSON only uses a double quote character to delimit strings (Python of course can use single or double quotes)
+  - Neither JSON lists or dictionaries can have trailing commas (unlike their Python equivalents).
 
 Each dictionary within the JSON array represents a single test case, with it's own call arguments, expected return value
 and ability to catch expected exceptions from the function under test. These are provided by a set of keys within the dictionary.
@@ -139,7 +139,7 @@ in any builtin type, including strings, lists, tuples, sets, dictionaries, integ
 
 .. note::
     It is currently impossible to pass values which derive from a library that needs to be imported. This limitation
-    might be removed in a future updated.
+    might be removed in a future update.
 
 
 .. _return_detail:
@@ -203,7 +203,7 @@ tuples, sets, dictionaries, integers, floats and complex values.
 
 .. note::
     It is currently impossible to test for return values which derive from a library that needs to be imported. This limitation
-    might be removed in a future updated.
+    might be removed in a future update.
 
 
 .. _examples:
@@ -250,9 +250,9 @@ The example test data is to confirm that all conditions have been met (at least 
 
 .. note::
     In many cases it would be recommended where possible to write a short script which produces testdata.json file with 100
-    or more test cases. An example of an auto generated testdata set is provided in `ExampleTestData`_. The script which
-    produced this data is provided as `ExampleTestDataScript`_.
+    or more test cases. An example of an auto generated testdata set is provided in `example challenge test data`_. The script which
+    produced this data is provided as `testdata_producer.py in example_challenge`_.
 
-.. _ExampleTestData : https://github.com/TonyFlury/QuoraChallengesTestData/example_challenge/testdata.json
-.. _ExampleTestDataScript : https://github.com/TonyFlury/QuoraChallengesTestData/example_challenge/testdata_producer.py
+.. _example challenge test data : https://github.com/TonyFlury/QuoraChallengesTestData/blob/master/example_challenge/testdata.json
+.. _testdata_producer.py in example_challenge : https://github.com/TonyFlury/QuoraChallengesTestData/blob/master/example_challenge/testdata_producer.py
 

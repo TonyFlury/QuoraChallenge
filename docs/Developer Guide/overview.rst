@@ -38,7 +38,7 @@ In order to provide a programming challenge under this framework you will need t
       that the function meets the description. See :doc:`Test Data Guidelines<testdata>` for details on how to write this
       critical file. Note that errors in this file will be presented to the user during testing of their code, and those errors
       are likely to confuse challenge entrants.
-    - An examplar solution to the challenge - this is not published but is required to :doc:`testi your challenge test data<testdata>`.
+    - An examplar solution to the challenge - this is not published but is required to :doc:`test your challenge information<testdata>` before publication.
 
     Please read the documentation while developing this content.
 
@@ -89,11 +89,11 @@ To make it clear - these are the changes and new files that are required in orde
 Likely Audiences
 ----------------
 
-When developing your challenge, please keep in mind at all times the target audience. The `Python Beginners`_ space is
-intended for those developers who are just starting out with Python and likely just starting out with development. It is
-likely that they wont be up to speed with most data structure and algorithms. Challenges aimed at the developers in
-`Python Programming`_ (who generally have skill level intermediate and beyond) will be much less common and should be
-more likely to admit more than one style of solution.
+When developing your challenge, please keep in mind at all times the target audience.
+
+ - The `Python Beginners`_ space is intended for those developers who are just starting out with Python and likely just starting out with development. It is likely that they wont be up to speed with most data structure and algorithms.
+
+ - Challenges aimed at the developers in `Python Programming`_ (who generally have skill level intermediate and beyond) will be much less common and the challenges should be open to multiple styles of solution, using data structures and algorithms
 
 .. _AdditionalInfo:
 

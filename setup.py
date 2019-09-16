@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-from quorachallenge.version import __version__ as version
+version = '0.0.1rc1'
 
 __author__ = 'Tony Flury anthony.flury@btinternet.com'
 __created__ = '20 Aug 2019'
@@ -31,6 +31,7 @@ setup(
 
     description='Quora Challenge: The framework for the Quora development challenges - supporting project description and testing.',
     long_description=long_description,
+    version = version,
 
     # The project's main homepage.
     url='http://quorachallenge.readthedocs.org/en/latest/',
@@ -60,12 +61,9 @@ setup(
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
 
-        #        'Programming Language :: Python :: 2.7',
-
-
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 
     # What does your project relate to?
@@ -79,14 +77,16 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['six'],
+    install_requires=['click','docutils','requests','sphinx','sphinx-rtd-theme'],
+
+    python_requires=">=3.6",
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['check-manifest'],
+        'dev': [],
         'test': ['coverage'],
     },
 

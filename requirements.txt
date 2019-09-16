@@ -1,3 +1,5 @@
+docutils
 requests
 click
-docutils
+sphinx
+sphinx-rtd-theme
