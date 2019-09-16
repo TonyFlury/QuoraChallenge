@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-version = '0.0.1rc1'
+version = '0.1.0rc1'
 
 __author__ = 'Tony Flury anthony.flury@btinternet.com'
 __created__ = '20 Aug 2019'
@@ -107,7 +107,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
     },
-    test_suite='tests',
-    tests_require=['flake8']
+    test_suite='tests/test_quorachallenge.py',
+    tests_require=[]
 )
 
