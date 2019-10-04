@@ -32,17 +32,17 @@ Automatically test your function
 --------------------------------
 To test your function which you think solves a given challenge use the :ref:`AutoTest Decorator<function_AutoTest>`.
 
-Imagine we have written function ``my_func`` to 'solve challenge1'
+Imagine we have written function ``my_func`` to solve 'challenge1'
 
 .. code-block:: python
 
     import quorachallenge
 
-    @quorachallenge.autotest('challenge')
+    @quorachallenge.autotest('challenge1')
     def my_func(a, b):
         return a+b
 
-Then this code snippet will automatically test my_func against all of the test cases defined for this challenge, and report any errors or exceptions that occur during the testing.
+This code will automatically test my_func against all of the test cases defined for this challenge, and report any errors or exceptions that occur during the testing.
 The displayed messages will identify the test case id that failed and some details of the failure.
 
 The :ref:`AutoTest Decorator<function_AutoTest>` can also be used in a more indirect way as shown in this example
