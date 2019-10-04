@@ -21,6 +21,7 @@ import click
 import sys
 import quorachallenge as qc
 import requests
+import io
 
 from unittest.mock import Mock, patch
 
@@ -79,6 +80,29 @@ class TestCases(unittest.TestCase):
 
         solver(func)
         self.assertTrue(solver.passed)
+
+    @patch.object(_core.requests,'get', patched_requests(200, test_data=[{'arguments':'1,2','return':'3'}],description='This is the description'))
+    def test_000_015_single_pass(self):
+        """Test a simple function which will pass once"""
+
+        def func(a,b):
+            return a + b
+
+        with patch('sys.stdout', new = io.StringIO()) as out:
+            solver = qc.autotest(challenge_name ='challenge1')
+            solver(func)
+            self.assertTrue(solver.passed)
+
+        s = out.getvalue()
+        self.assertEqual(
+"""1 test cases executed.
+Unexpected exceptions raised:
+None
+
+Return value errors:
+None
+""",s)
+
 
     @patch.object(_core.requests,'get', patched_requests(200, test_data=[{'arguments':'1,2','return':'3'},
                                                                       {'arguments':'5,3','return':'8'}],

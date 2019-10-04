@@ -128,12 +128,12 @@ class autotest:
 
         if not self._defer_results:
             print(f'{self._cases_completed} test cases executed.')
-            print('Unexpected exceptionsraised:')
+            print('Unexpected exceptions raised:')
             if self._exceptions:
                 print('\n'.join(x for x in self._exceptions.values()))
             else:
                 print('None')
-            print('\nReturn value errors : ')
+            print('\nReturn value errors:')
             if self._errors:
                 print('\n'.join(x for x in self._errors.values()))
             else:
@@ -182,7 +182,8 @@ class autotest:
                 err_string = type(err).__name__
             self._exceptions[
                 test_id] = f'Unexpected exception raised on Test case test_id {test_id} - ' \
-                           f'call {test_function.__name__}({arguments}) : Exception raised - {err_string}'
+                           f'call {test_function.__name__}({arguments}) - Return value {expected_return!r} expected ' \
+                           f'but an Exception raised - {err_string}'
             return
 
         # compare values
