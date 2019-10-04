@@ -8,7 +8,7 @@ which means that the pull request has been merged into the master branch.
 
 Ideally you need to test your description formats correctly, and that the test data is both formatted correctly and will
 correctly prove that the Entrants function meets the requirements before attempting the pull request. You can accomplish
-this by using the ``_directory`` argument on the :ref:`function_describe`, :ref:`function_autotest` and :ref:`function_testdata`.
+this by using the ``_directory`` argument on the :ref:`describe function<function_describe>`, :ref:`autotest function<function_autotest>` and :ref:`testdata function<function_testdata>`.
 
 The ``_directory`` argument allows the developer to specify the top-level directory of their challenges under development
  - i.e. the parent of the challenge directory that contains the description.rst and testdata.json files.
