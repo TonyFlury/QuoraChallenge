@@ -11,6 +11,12 @@ The Quora challenge framework is very easy to use and can do 3 main useful thing
     The quorachallenge framework relies heavily on being able to download data and descriptions from the public internet, so you need to ensure you have a working network connection
     when using the framework.
 
+.. note::
+    This documentation regularly uses the name '**challenge1**' as the name of the challenge being solved and tested. This
+    name is just an example for the sake of the documentation. The challenge name you need to use for any given challenge
+    will be stated clearly on the post on Quora that describes the challenge - so make sure you use the right name.
+    When new challenges are posted there will be no need to install a new version of the framework - just use the new name.
+
 .. _description:
 
 To get the challenge Description
