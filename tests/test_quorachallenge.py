@@ -81,12 +81,12 @@ class TestCases(unittest.TestCase):
         solver(func)
         self.assertTrue(solver.passed)
 
-    @patch.object(_core.requests,'get', patched_requests(200, test_data=[{'arguments':'1,2','return':'3'}],description='This is the description'))
-    def test_000_015_single_pass(self):
-        """Test a simple function which will pass once"""
+    @patch.object(_core.requests,'get', patched_requests(200, test_data=[{'arguments':'1,2','return':'"3"'}],description='This is the description'))
+    def test_000_015_single_pass_str(self):
+        """Test a simple function which will pass once - compare strings"""
 
         def func(a,b):
-            return a + b
+            return str(a + b)
 
         with patch('sys.stdout', new = io.StringIO()) as out:
             solver = qc.autotest(challenge_name ='challenge1')

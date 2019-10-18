@@ -247,11 +247,15 @@ class autotest:
             return f'return is too long - expecting {_type_label} of length {len(expected)}, received {_type_label} ' \
                    f'of length {len(received)}'
 
-        for i, (ei, oi) in enumerate(zip(expected, received)):
-            res = self._compare_values(ei, oi)
-            if res:
-                return f'{_type_label} index {i} : {res}'
-        return ''
+        if _type is str:
+            if expected != received:
+                return f'Expected ({expected}) != received ({received})'
+        else:
+            for i, (ei, oi) in enumerate(zip(expected, received)):
+                res = self._compare_values(ei, oi)
+                if res:
+                    return f'{_type_label} index {i} : {res}'
+            return ''
 
     @staticmethod
     def _compare_dicts(expected: dict, received: dict):
