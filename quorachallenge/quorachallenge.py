@@ -116,6 +116,7 @@ class autotest:
         """Invoking the decorator will automatically test the function"""
         self._errors.clear()
         self._exceptions.clear()
+        test_count = 0
 
         for index, item in enumerate(self._data):
             test_id = item.get('test_id', str(index))
@@ -123,8 +124,9 @@ class autotest:
                 continue
             item['test_id'] = test_id
             self._compare(index, item, test_function)
+            test_count +=1
 
-        self._cases_completed = len(self._data)
+        self._cases_completed = test_count
 
         if not self._defer_results:
             print(f'{self._cases_completed} test cases executed.')
