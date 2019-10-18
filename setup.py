@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-version = '1.0'
+version = '1.0.1'
 
 __author__ = 'Tony Flury anthony.flury@btinternet.com'
 __created__ = '20 Aug 2019'
