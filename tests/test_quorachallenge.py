@@ -120,22 +120,6 @@ None
         self.assertEqual(len(solver.errors), 0)
         self.assertEqual(len(solver.exceptions), 0)
 
-    @patch.object(_core.requests,'get', patched_requests(200, test_data=[{'test_id':'001','arguments':'1,2','return':'3'},
-                                                                      {'test_id':'002','arguments':'5,3','return':'8'}],
-                                                                        description='This is the description'))
-    def test_000_025_multiple_test_single_execution(self):
-        """Ensure that the single correct passes is recorded correctly when multiple tests are defined"""
-
-        def func(a,b):
-            return a + b
-
-        solver = qc.autotest(challenge_name ='challenge1', test_id='001', defer_results=True)
-        solver(func)
-
-        self.assertTrue(solver.passed)
-        self.assertEqual(len(solver.errors), 0)
-        self.assertEqual(len(solver.exceptions), 0)
-        self.assertEqual(solver.executed,1)
 
     @patch.object(_core.requests,'get', patched_requests(200, test_data=[{'arguments':'1,2','return':'3'},
                                                                       {'arguments':'5,3','return':'7'}],description='This is the description'))
